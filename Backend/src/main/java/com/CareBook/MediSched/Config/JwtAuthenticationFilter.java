@@ -23,34 +23,35 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        String path = request.getRequestURI();
-        if(path.startsWith("/user/register") || path.startsWith("/user/login") || path.startsWith("/user/forgot-password")){
-            filterChain.doFilter(request, response);
-            return;
-        }
+    String path = request.getServletPath();
 
-        String jwtToken = request.getHeader("Authorization");
-        if(jwtToken == null || !jwtToken.startsWith("Bearer")){
-            filterChain.doFilter(request, response);
-            return;
-        }
-
-        jwtToken = jwtToken.substring(7);
-        if(!jwtService.isTokenValid(jwtToken)){
-            filterChain.doFilter(request, response);
-            return;
-        }
-
-        var user = userDetailsService.loadUserByUsername(jwtService.extractSubject(jwtToken));
-        if(SecurityContextHolder.getContext().getAuthentication() == null)
-        {
-            var authenticationToken = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
-            authenticationToken.setDetails(request);
-            SecurityContextHolder.getContext().setAuthentication(authenticationToken);
-        }
-
-        filterChain.doFilter(request, response);
-
+    if (path.startsWith("/user/login") || path.startsWith("/user/register") || path.startsWith("/user/forgot-password")) {
+    filterChain.doFilter(request, response);
+    return;
     }
+
+
+    String jwtToken = request.getHeader("Authorization");
+    if (jwtToken == null || !jwtToken.startsWith("Bearer ")) {
+        filterChain.doFilter(request, response);
+        return;
+    }
+
+    jwtToken = jwtToken.substring(7);
+    if (!jwtService.isTokenValid(jwtToken)) {
+        filterChain.doFilter(request, response);
+        return;
+    }
+
+    var user = userDetailsService.loadUserByUsername(jwtService.extractSubject(jwtToken));
+    if (SecurityContextHolder.getContext().getAuthentication() == null) {
+        var authenticationToken = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
+        authenticationToken.setDetails(request);
+        SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+    }
+
+    filterChain.doFilter(request, response);
+}
+
 
 }

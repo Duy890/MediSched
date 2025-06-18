@@ -46,7 +46,8 @@ public class SecurityConfig {
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
                                 "/swagger-resources/**",
-                                "/bot/chat"
+                                "/bot/chat",
+                                "/error"
                         ).permitAll()
 
                         // role USER
