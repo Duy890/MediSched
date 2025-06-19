@@ -17,96 +17,65 @@ function DoctorDetails() {
   const hasFetched = useRef(false)
   const effectCleanedUp = useRef(false)
 
-  useEffect(() => {
-    // This flag helps us track if the effect has been cleaned up
-    let isMounted = true
+useEffect(() => {
+  let isMounted = true;
 
-    const loadDoctorData = async () => {
-      // Skip if we've already fetched or no ID is provided
-      if (hasFetched.current || !id) return
+  const loadDoctorData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
 
-      // Mark as fetched to prevent duplicate calls
-      hasFetched.current = true
+      console.log("Loading doctor with ID:", id);
 
-      try {
-        if (!isMounted) return // Don't proceed if component unmounted
+      const doctorResponse = await getDoctorById(id);
+      if (!isMounted) return;
 
-        setLoading(true)
-        setError(null)
+      const doctorData = doctorResponse.data;
+      console.log("Doctor data:", doctorData);
 
-        console.log("Loading doctor with ID:", id)
+      const transformedDoctor = {
+        id: doctorData.id,
+        fullName: doctorData.fullName,
+        specialty: doctorData.specialty || "Chưa xác định",
+        department: doctorData.department,
+        email: doctorData.email,
+        imageUrl: doctorData.imageUrl,
+        fee: doctorData.fee || 0,
+        description: doctorData.description,
+        role: doctorData.role || "Bác sĩ",
+        experience: doctorData.experience || 5,
+        rating: doctorData.rating || 4.5,
+        hospital: doctorData.department?.name || doctorData.hospital || "Bệnh viện",
+        address: doctorData.department?.address || doctorData.address || "Địa chỉ bệnh viện",
+      };
 
+      setDoctor(transformedDoctor);
+      await loadReviews(id, isMounted);
+    } catch (err) {
+      console.error("Error loading doctor:", err);
+      let errorMessage = "Không thể tải thông tin bác sĩ.";
 
-        // Load doctor details
-        const doctorResponse = await getDoctorById(id)
-
-        if (!isMounted) return // Don't proceed if component unmounted
-        console.log("Doctor response:", doctorResponse)
-
-        const doctorData = doctorResponse.data
-
-        // Transform the data to match our component structure
-        const transformedDoctor = {
-          id: doctorData.id,
-          fullName: doctorData.fullName || `${doctorData.firstName || ""} ${doctorData.lastName || ""}`.trim(),
-          specialty: doctorData.specialty || "Chưa xác định",
-          department: doctorData.department,
-          email: doctorData.email,
-          imageUrl: doctorData.imageUrl,
-          fee: doctorData.fee || 0,
-          description: doctorData.description,
-          role: doctorData.role || "Bác sĩ",
-          // Add default values for fields that might not be in the backend
-          experience: doctorData.experience || 5,
-          rating: doctorData.rating || 4.5,
-          hospital: doctorData.department?.name || doctorData.hospital || "Bệnh viện",
-          address: doctorData.department?.address || doctorData.address || "Địa chỉ bệnh viện",
-        }
-
-        if (!isMounted) return // Don't proceed if component unmounted
-        setDoctor(transformedDoctor)
-
-        // Load reviews
-        await loadReviews(id, isMounted)
-      } catch (err) {
-        if (!isMounted) return // Don't update state if component unmounted
-
-        console.error("Error loading doctor:", err)
-
-        // Provide more specific error messages
-        let errorMessage = "Không thể tải thông tin bác sĩ."
-
-        if (err.code === "ERR_NETWORK") {
-          errorMessage = "Không thể kết nối đến server. Backend có thể chưa được khởi động."
-        } else if (err.response?.status === 404) {
-          errorMessage = "Không tìm thấy thông tin bác sĩ."
-        } else if (err.response?.status === 500) {
-          errorMessage = "Lỗi server. Vui lòng thử lại sau."
-        } else if (err.message.includes("Mock doctor")) {
-          errorMessage = `Không tìm thấy bác sĩ với ID ${id} trong dữ liệu mẫu.`
-        }
-
-        setError(errorMessage)
-      } finally {
-        if (isMounted) {
-          setLoading(false)
-        }
+      if (err.code === "ERR_NETWORK") {
+        errorMessage = "Không thể kết nối đến server. Backend có thể chưa được khởi động.";
+      } else if (err.response?.status === 404) {
+        errorMessage = "Không tìm thấy thông tin bác sĩ.";
+      } else if (err.response?.status === 500) {
+        errorMessage = "Lỗi server. Vui lòng thử lại sau.";
       }
-    }
 
-    // Reset the fetch flag when ID changes
-    if (!effectCleanedUp.current) {
-      hasFetched.current = false
-      loadDoctorData()
+      setError(errorMessage);
+    } finally {
+      if (isMounted) setLoading(false);
     }
+  };
 
-    // Cleanup function
-    return () => {
-      isMounted = false
-      effectCleanedUp.current = true
-      hasFetched.current = false
-    }
-  }, [id])
+  loadDoctorData();
+
+  return () => {
+    isMounted = false;
+  };
+}, [id]);
+
 
   const loadReviews = async (doctorId, isMounted) => {
     try {

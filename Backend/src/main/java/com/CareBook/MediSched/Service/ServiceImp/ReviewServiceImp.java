@@ -7,6 +7,10 @@ import com.CareBook.MediSched.Repository.PatientRepository;
 import com.CareBook.MediSched.Repository.ReviewRepository;
 import com.CareBook.MediSched.Service.ReviewService;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -62,5 +66,6 @@ public class ReviewServiceImp implements ReviewService {
                 review.getDoctor().getId()
         );
     }
+
 }
 

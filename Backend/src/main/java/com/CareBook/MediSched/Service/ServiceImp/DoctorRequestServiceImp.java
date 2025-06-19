@@ -56,6 +56,7 @@ public class DoctorRequestServiceImp implements DoctorRequestService {
                 .daysOfWeek(days)
                 .fee(doctorRequestDto.getFee())
                 .description(doctorRequestDto.getDescription())
+                .rating(doctorRequestDto.getRating())
                 .imageUrl(imageUrl)
                 .build();
 
@@ -104,7 +105,7 @@ public class DoctorRequestServiceImp implements DoctorRequestService {
     }
 
     private DoctorRequestDto docRequestToDto(DoctorRequest doctorRequest){
-        return new DoctorRequestDto(doctorRequest.getId(), doctorRequest.getStatus().name(), doctorRequest.getSpecialty().name(), doctorRequest.getDaysOfWeek().stream().map(DayOfWeek::name).collect(Collectors.toList()), doctorRequest.getDepartment().getId(), doctorRequest.getStartTime(), doctorRequest.getEndTime(), doctorRequest.getFee(), doctorRequest.getDescription());
+        return new DoctorRequestDto(doctorRequest.getId(), doctorRequest.getStatus().name(), doctorRequest.getSpecialty().name(), doctorRequest.getDaysOfWeek().stream().map(DayOfWeek::name).collect(Collectors.toList()), doctorRequest.getDepartment().getId(), doctorRequest.getStartTime(), doctorRequest.getEndTime(), doctorRequest.getFee(), doctorRequest.getDescription(), doctorRequest.getRating());
     }
 
     private String uploadFile(MultipartFile file){

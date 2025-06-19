@@ -31,27 +31,28 @@ useEffect(() => {
 }, []);
 
 
-  const handleSearch = async (e) => {
-    e.preventDefault();
-    setLoading(true);
+const handleSearch = async (e = null) => {
+  if (e) e.preventDefault();
+  setLoading(true);
 
-    try {
-      const response = await axios.get('http://localhost:8080/doctor/search', {
-        params: {
-          name: searchTerm || null,
-          specialty: selectedSpecialty || null,
-          page: 0,
-        },
-      });
+  try {
+    const response = await axios.get('http://localhost:8080/doctor/search', {
+      params: {
+        name: searchTerm?.trim() || "",
+        specialty: selectedSpecialty || "",
+        page: 0,
+      },
+    });
 
-      setDoctors(response.data);
-    } catch (error) {
-      console.error("Lỗi khi tìm bác sĩ:", error);
-      setDoctors([]);
-    } finally {
-      setLoading(false);
-    }
-  };
+    setDoctors(response.data);
+  } catch (error) {
+    console.error("Lỗi khi tìm bác sĩ:", error);
+    setDoctors([]);
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
     <Container className="py-5">
@@ -101,29 +102,29 @@ useEffect(() => {
                 <Card className="h-100 shadow-sm">
                   <Card.Img
                     variant="top"
-                    src={doctor.avatar || 'https://via.placeholder.com/400x200'}
+                    src={doctor.imageUrl || 'https://via.placeholder.com/400x200'}
                     style={{ height: '200px', objectFit: 'cover' }}
                   />
                   <Card.Body>
                     <Card.Title>
-                      {doctor.title || 'Bs.'} {doctor.firstName} {doctor.lastName}
+                      {doctor.title || 'Bs.'} {doctor.fullName}
                     </Card.Title>
 
                     <div className="mb-2">
-                      {doctor.specialization && (
+                      {doctor.specialty && (
                         <Badge bg="info" className="me-1">
-                          {doctor.specialization}
+                          {doctor.specialty}
                         </Badge>
                       )}
                     </div>
 
                     <Card.Text>
-                      <i className="bi bi-hospital me-2"></i> {doctor.departmentName || 'Không rõ'}<br />
+                      <i className="bi bi-hospital me-2"></i> {doctor.department?.name  || 'Không rõ'}<br />
                       <i className="bi bi-star-fill me-2 text-warning"></i> {doctor.rating || 0}/5.0<br />
                       <i className="bi bi-calendar-check me-2"></i> {doctor.experience || 0} năm kinh nghiệm<br />
                       {doctor.price && (
                         <strong>
-                          <i className="bi bi-cash me-2"></i> {doctor.price.toLocaleString('vi-VN')}đ / lần khám
+                          <i className="bi bi-cash me-2"></i> {doctor.fee.toLocaleString('vi-VN')}đ / lần khám
                         </strong>
                       )}
                     </Card.Text>
@@ -148,5 +149,7 @@ useEffect(() => {
     </Container>
   );
 }
+
+
 
 export default DoctorSearch;

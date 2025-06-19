@@ -28,6 +28,7 @@ public class DoctorServiceImp implements DoctorService {
     private final ScheduleRepository scheduleRepository;
     private final DepartmentRepository departmentRepository;
     private final UserRepository userRepository;
+    private final ReviewRepository reviewRepository;
 
 
     @Override
@@ -141,25 +142,31 @@ public class DoctorServiceImp implements DoctorService {
 
     @Override
     public List<DoctorDto> findByDoctorNameOrSpecialty(String name, String specialty, String page) {
-        if(name != null && !name.trim().toLowerCase().isEmpty()){
-            name = name.trim().toLowerCase();
-        }else {
-            name = null;
-        }
-        if(specialty != null && !specialty.trim().isEmpty()){
-            try {
-                Specialty.valueOf(specialty);
-                specialty = specialty.trim().toUpperCase();
-            }catch (IllegalArgumentException e){
-                specialty = null;
-            }
-        }
-        Pageable pageable = PageRequest.of(Integer.parseInt(page), 10, Sort.by("fullName").ascending());
-
-        List<Doctor> doctors = doctorRepository.searchDoctors(name,specialty,pageable).getContent();
-
-        return doctors.stream().map(this::mapToDocDto).collect(Collectors.toList());
+    if (name == null || name.trim().isEmpty()) {
+        name = null;
+    } else {
+        name = name.trim().toLowerCase();
     }
+
+    if (specialty == null || specialty.trim().isEmpty()) {
+        specialty = null;
+    } else {
+        try {
+            // kiểm tra nếu không phải Enum hợp lệ → bỏ filter
+            Specialty.valueOf(specialty.trim().toUpperCase());
+            specialty = specialty.trim().toLowerCase(); // giữ nguyên để so sánh bằng LIKE
+        } catch (IllegalArgumentException e) {
+            specialty = null;
+        }
+    }
+
+    Pageable pageable = PageRequest.of(Integer.parseInt(page), 10, Sort.by("fullName").ascending());
+
+    List<Doctor> doctors = doctorRepository.searchDoctors(name, specialty, pageable).getContent();
+
+    return doctors.stream().map(this::mapToDocDto).collect(Collectors.toList());
+    }
+
 
     @Override
     public DoctorDto getDoctorProfile(User user) {
@@ -172,16 +179,19 @@ public class DoctorServiceImp implements DoctorService {
     }
 
     private DoctorDto mapToDocDto(Doctor doctor) {
+        Double rating = reviewRepository.findAverageRatingByDoctorId(doctor.getId());
         return new DoctorDto(
-                doctor.getId(),
-                doctor.getFullName(),
-                doctor.getSpecialty().name(),
-                doctor.getDepartment(),
-                doctor.getUser().getEmail(),
-                doctor.getImageUrl(),
-                doctor.getFee(),
-                doctor.getDescription(),
-                doctor.getRole().name());
+            doctor.getId(),
+            doctor.getFullName(),
+            doctor.getSpecialty().name(),
+            doctor.getDepartment(),
+            doctor.getUser().getEmail(),
+            doctor.getImageUrl(), 
+            doctor.getFee(),
+            doctor.getDescription(),
+            doctor.getRole().name(),
+            rating != null ? rating : 0.0 
+        );
     }
 
 }

@@ -30,5 +30,7 @@ public class DoctorRequestDto {
 
     private String description;
 
+    private Double rating; 
+
 
 }

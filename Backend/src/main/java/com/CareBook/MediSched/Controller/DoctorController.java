@@ -35,6 +35,7 @@ public class DoctorController {
             @RequestParam String startTime,
             @RequestParam String endTime,
             @RequestParam Double fee,
+            @RequestParam double rating,
             @RequestParam String description,
             @RequestParam MultipartFile file,
             Authentication authentication){

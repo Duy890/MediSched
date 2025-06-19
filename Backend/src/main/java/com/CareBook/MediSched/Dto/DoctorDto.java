@@ -31,4 +31,6 @@ public class DoctorDto {
 
     private String role;
 
+    private Double rating;  
+
 }

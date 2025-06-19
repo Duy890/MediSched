@@ -3,6 +3,7 @@ import { Container } from "react-bootstrap"
 import "./App.css"
 import "bootstrap-icons/font/bootstrap-icons.css"
 import "./style/booking.css"
+import 'bootstrap/dist/css/bootstrap.min.css'
 
 // Context Providers
 import { AuthProvider } from "./context/AuthContext"

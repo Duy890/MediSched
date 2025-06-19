@@ -52,4 +52,5 @@ public class DoctorRequest {
 
     private String description;
 
+    private Double rating;
 }
